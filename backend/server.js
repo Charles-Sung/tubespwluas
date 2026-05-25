@@ -9,12 +9,20 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.json({ message: "Welcome to Capstone 2 API" });
+    res.json({ message: "Welcome to REST API - Autentikasi & Master Data" });
 });
 
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/drafts', require('./routes/draftRoutes'));
-app.use('/api/reviews', require('./routes/reviewRoutes'));
+// Register routes
+app.use('/api', require('./routes/authRoutes')); // Handles POST /api/login
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/rooms', require('./routes/roomRoutes'));
+app.use('/api/items', require('./routes/itemRoutes'));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Terjadi kesalahan internal pada server.' });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

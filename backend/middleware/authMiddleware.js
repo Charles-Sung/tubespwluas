@@ -1,28 +1,31 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'capstone2_secret_key';
-
-exports.authenticate = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Token tidak valid atau tidak disediakan.' });
+const authenticate = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        return res.status(401).json({ message: 'Akses ditolak: Token tidak ditemukan.' });
     }
 
     const token = authHeader.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Akses ditolak: Format token salah.' });
+    }
+
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'supersecretjwttokenkey123');
+        
+        // Ensure user is admin
+        if (decoded.role !== 'admin') {
+            return res.status(403).json({ message: 'Akses ditolak: Hanya Administrator yang diizinkan.' });
+        }
+
         req.user = decoded;
         next();
     } catch (error) {
-        return res.status(401).json({ message: 'Token kadaluarsa atau tidak valid.' });
+        return res.status(403).json({ message: 'Akses ditolak: Token tidak valid atau kedaluwarsa.' });
     }
 };
 
-exports.authorize = (roles) => {
-    return (req, res, next) => {
-        if (!req.user || !roles.includes(req.user.role)) {
-            return res.status(403).json({ message: 'Akses ditolak.' });
-        }
-        next();
-    };
+module.exports = {
+    authenticate
 };
