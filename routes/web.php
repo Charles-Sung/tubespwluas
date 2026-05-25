@@ -1,19 +1,51 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\ItemController;
 
-Route::get('/', function () {
-    return view('welcome');
+// Auth Routes (Guest)
+Route::middleware('guest')->group(function () {
+    Route::get('/', [AuthController::class, 'showLogin'])->name('home');
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['jwt'])->name('dashboard');
-
+// Protected Routes (JWT Session Middleware)
 Route::middleware('jwt')->group(function () {
-    // Profil dan rute lainnya akan menggunakan API backend
-    // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-});
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/dashboard', [DashboardController::index, 'index'])->name('dashboard');
 
-require __DIR__.'/auth.php';
+    // Users CRUD
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/create', [UserController::class, 'create'])->name('create');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
+    });
+
+    // Rooms CRUD
+    Route::prefix('rooms')->name('rooms.')->group(function () {
+        Route::get('/', [RoomController::class, 'index'])->name('index');
+        Route::get('/create', [RoomController::class, 'create'])->name('create');
+        Route::post('/', [RoomController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [RoomController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [RoomController::class, 'update'])->name('update');
+        Route::delete('/{id}', [RoomController::class, 'destroy'])->name('destroy');
+    });
+
+    // Items CRUD
+    Route::prefix('items')->name('items.')->group(function () {
+        Route::get('/', [ItemController::class, 'index'])->name('index');
+        Route::get('/create', [ItemController::class, 'create'])->name('create');
+        Route::post('/', [ItemController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [ItemController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ItemController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ItemController::class, 'destroy'])->name('destroy');
+    });
+});
