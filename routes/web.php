@@ -17,7 +17,7 @@ Route::middleware('guest')->group(function () {
 // Protected Routes (JWT Session Middleware)
 Route::middleware('jwt')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [DashboardController::index, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Users CRUD
     Route::prefix('users')->name('users.')->group(function () {
