@@ -4,8 +4,10 @@ const { sequelize, User, Room, Item } = require('../models');
 async function seed() {
     try {
         console.log("Connecting to the database and syncing tables...");
-        // Sync models
+        // Disable FK checks so tables can be dropped safely
+        await sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true });
         await sequelize.sync({ force: true });
+        await sequelize.query('SET FOREIGN_KEY_CHECKS = 1', { raw: true });
         console.log("Database tables synchronized.");
 
         // Hash admin password

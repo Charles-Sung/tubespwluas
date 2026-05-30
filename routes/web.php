@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\ProcurementController;
 
 // Auth Routes (Guest)
 Route::middleware('guest')->group(function () {
@@ -47,5 +48,16 @@ Route::middleware('jwt')->group(function () {
         Route::get('/{id}/edit', [ItemController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ItemController::class, 'update'])->name('update');
         Route::delete('/{id}', [ItemController::class, 'destroy'])->name('destroy');
+    });
+
+    // Procurement Routes (Kalab & Kaprodi)
+    Route::prefix('procurements')->name('procurements.')->group(function () {
+        Route::get('/', [ProcurementController::class, 'index'])->name('index');
+        Route::get('/create', [ProcurementController::class, 'create'])->name('create');
+        Route::post('/', [ProcurementController::class, 'store'])->name('store');
+        Route::get('/{id}', [ProcurementController::class, 'show'])->name('show');
+        Route::post('/{id}/submit', [ProcurementController::class, 'submit'])->name('submit');
+        Route::post('/detail/{detailId}/review', [ProcurementController::class, 'review'])->name('review');
+        Route::post('/{id}/finalize', [ProcurementController::class, 'finalize'])->name('finalize');
     });
 });

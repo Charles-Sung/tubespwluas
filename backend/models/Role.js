@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Room = sequelize.define('Room', {
+const Role = sequelize.define('Role', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -10,14 +10,10 @@ const Room = sequelize.define('Room', {
     name: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    description: {
-        type: DataTypes.TEXT,
-        allowNull: true
     }
 }, {
-    tableName: 'rooms',
+    tableName: 'roles',
     underscored: true
 });
 
-module.exports = Room;
+module.exports = Role;

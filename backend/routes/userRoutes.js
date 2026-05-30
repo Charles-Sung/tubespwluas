@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
-const { authenticate } = require('../middleware/authMiddleware');
+const { authenticate, isAdmin } = require('../middleware/authMiddleware');
 
-// All routes are protected by JWT authentication
-router.use(authenticate);
+// All routes are protected by JWT authentication and Administrator role
+router.use(authenticate, isAdmin);
 
 router.get('/', userController.getAllUsers);
 router.post('/', userController.createUser);

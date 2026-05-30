@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { User, Role } = require('../models');
 
 const login = async (req, res) => {
     try {
@@ -10,8 +10,16 @@ const login = async (req, res) => {
             return res.status(400).json({ message: 'Email dan password wajib diisi.' });
         }
 
-        // Find user by email
-        const user = await User.findOne({ where: { email } });
+        // Find user by email along with Role details
+        const user = await User.findOne({ 
+            where: { email },
+            include: [{
+                model: Role,
+                as: 'role',
+                attributes: ['id', 'name']
+            }]
+        });
+
         if (!user) {
             return res.status(401).json({ message: 'Email atau password salah.' });
         }
@@ -22,18 +30,19 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Email atau password salah.' });
         }
 
-        // Check role
-        if (user.role !== 'admin') {
-            return res.status(403).json({ message: 'Akses ditolak: Hanya Administrator yang diizinkan masuk.' });
+        // Allow all roles to login (Admin, Kepala Lab, Kaprodi, Staf Admin, Staf Lab)
+        if (!user.role) {
+            return res.status(403).json({ message: 'Akses ditolak: Role pengguna tidak valid.' });
         }
 
-        // Generate JWT token
+        // Generate JWT token - include role_id and role name for permission checks
         const token = jwt.sign(
             { 
                 id: user.id, 
                 name: user.name, 
                 email: user.email, 
-                role: user.role 
+                role: user.role.name,
+                role_id: user.role_id
             },
             process.env.JWT_SECRET || 'supersecretjwttokenkey123',
             { expiresIn: '24h' }
@@ -46,7 +55,8 @@ const login = async (req, res) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role.name,
+                role_id: user.role_id
             }
         });
     } catch (error) {

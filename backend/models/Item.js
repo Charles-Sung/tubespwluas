@@ -7,26 +7,17 @@ const Item = sequelize.define('Item', {
         primaryKey: true,
         autoIncrement: true
     },
-    item_name: {
+    name: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    category: {
-        type: DataTypes.STRING,
+    type: {
+        type: DataTypes.ENUM('inventory', 'bhp'),
         allowNull: false
     },
-    stock: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0
-    },
-    room_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'rooms',
-            key: 'id'
-        }
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 }, {
     tableName: 'items',

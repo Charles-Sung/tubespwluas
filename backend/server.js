@@ -14,9 +14,11 @@ app.get('/', (req, res) => {
 
 // Register routes
 app.use('/api', require('./routes/authRoutes')); // Handles POST /api/login
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/rooms', require('./routes/roomRoutes'));
 app.use('/api/items', require('./routes/itemRoutes'));
+app.use('/api/procurements', require('./routes/draftRoutes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

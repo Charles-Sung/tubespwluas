@@ -17,38 +17,36 @@ class DashboardController extends Controller
     public function index()
     {
         $token = session('jwt_token');
-        
+        $user = session('user');
+        $roleId = $user['role_id'] ?? null;
+
         $stats = [
             'users_count' => 0,
             'rooms_count' => 0,
             'items_count' => 0,
             'total_stock' => 0,
+            'procurement_count' => 0,
         ];
 
         try {
-            // Fetch users
-            $usersResponse = Http::withToken($token)->get("{$this->apiUrl}/users");
-            if ($usersResponse->successful()) {
-                $stats['users_count'] = count($usersResponse->json());
+            // Use backend dashboard endpoint (accessible by all roles)
+            $dashResponse = Http::withToken($token)->get("{$this->apiUrl}/dashboard");
+            if ($dashResponse->successful()) {
+                $data = $dashResponse->json();
+                $stats['rooms_count'] = $data['rooms_count'] ?? 0;
+                $stats['items_count'] = $data['items_count'] ?? 0;
+                $stats['total_stock'] = $data['total_stock'] ?? 0;
+                $stats['users_count'] = $data['users_count'] ?? 0;
             }
 
-            // Fetch rooms
-            $roomsResponse = Http::withToken($token)->get("{$this->apiUrl}/rooms");
-            if ($roomsResponse->successful()) {
-                $stats['rooms_count'] = count($roomsResponse->json());
-            }
-
-            // Fetch items
-            $itemsResponse = Http::withToken($token)->get("{$this->apiUrl}/items");
-            if ($itemsResponse->successful()) {
-                $items = $itemsResponse->json();
-                $stats['items_count'] = count($items);
-                $stats['total_stock'] = array_sum(array_column($items, 'stock'));
+            // Fetch procurement drafts count (all roles)
+            $procResponse = Http::withToken($token)->get("{$this->apiUrl}/procurements");
+            if ($procResponse->successful()) {
+                $stats['procurement_count'] = count($procResponse->json());
             }
 
         } catch (\Exception $e) {
-            // If connection to API fails, we still render dashboard but with 0 count
-            session()->flash('error', 'Koneksi ke backend API terputus. Beberapa data mungkin tidak dapat ditampilkan.');
+            session()->flash('error', 'Koneksi ke backend API terputus.');
         }
 
         return view('dashboard', compact('stats'));

@@ -13,12 +13,6 @@ const authenticate = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'supersecretjwttokenkey123');
-        
-        // Ensure user is admin
-        if (decoded.role !== 'admin') {
-            return res.status(403).json({ message: 'Akses ditolak: Hanya Administrator yang diizinkan.' });
-        }
-
         req.user = decoded;
         next();
     } catch (error) {
@@ -26,6 +20,35 @@ const authenticate = (req, res, next) => {
     }
 };
 
+const isAdmin = (req, res, next) => {
+    const roleId = req.user && req.user.role_id;
+    if (roleId !== 1) {
+        return res.status(403).json({ message: 'Akses ditolak: Hanya Administrator yang diizinkan.' });
+    }
+    next();
+};
+
+const isKaprodi = (req, res, next) => {
+    const roleId = req.user && req.user.role_id;
+    // Admin (1) can also access Kaprodi routes
+    if (roleId !== 3 && roleId !== 1) {
+        return res.status(403).json({ message: 'Akses ditolak: Hanya Ketua Program Studi yang diizinkan.' });
+    }
+    next();
+};
+
+const isKalab = (req, res, next) => {
+    const roleId = req.user && req.user.role_id;
+    // Admin (1) can also access Kalab routes
+    if (roleId !== 2 && roleId !== 1) {
+        return res.status(403).json({ message: 'Akses ditolak: Hanya Kepala Laboratorium yang diizinkan.' });
+    }
+    next();
+};
+
 module.exports = {
-    authenticate
+    authenticate,
+    isAdmin,
+    isKaprodi,
+    isKalab
 };

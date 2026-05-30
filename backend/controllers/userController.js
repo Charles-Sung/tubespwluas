@@ -1,13 +1,30 @@
 const bcrypt = require('bcryptjs');
-const { User } = require('../models');
+const { User, Role } = require('../models');
+
+// Helper to map role_id to string role for Frontend compatibility
+const mapUserRole = (userInstance) => {
+    if (!userInstance) return null;
+    const userJson = userInstance.toJSON();
+    // Map role_id 1 to 'admin', and anything else to 'user'
+    userJson.role = (userJson.role_id === 1) ? 'admin' : 'user';
+    return userJson;
+};
 
 // GET all users
 const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll({
-            attributes: { exclude: ['password'] }
+            attributes: { exclude: ['password'] },
+            include: [{
+                model: Role,
+                as: 'role',
+                attributes: ['name']
+            }]
         });
-        return res.status(200).json(users);
+        
+        // Map users to compatibility format
+        const mappedUsers = users.map(user => mapUserRole(user));
+        return res.status(200).json(mappedUsers);
     } catch (error) {
         console.error('Error fetching users:', error);
         return res.status(500).json({ message: 'Gagal mengambil data user.' });
@@ -18,12 +35,17 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id, {
-            attributes: { exclude: ['password'] }
+            attributes: { exclude: ['password'] },
+            include: [{
+                model: Role,
+                as: 'role',
+                attributes: ['name']
+            }]
         });
         if (!user) {
             return res.status(404).json({ message: 'User tidak ditemukan.' });
         }
-        return res.status(200).json(user);
+        return res.status(200).json(mapUserRole(user));
     } catch (error) {
         console.error('Error fetching user:', error);
         return res.status(500).json({ message: 'Gagal mengambil data user.' });
@@ -45,18 +67,25 @@ const createUser = async (req, res) => {
             return res.status(400).json({ message: 'Email sudah terdaftar.' });
         }
 
+        // Map role string to role_id
+        const role_id = (role === 'admin') ? 1 : 5;
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await User.create({
             name,
             email,
             password: hashedPassword,
-            role
+            role_id
         });
 
-        const { password: _, ...userWithoutPassword } = newUser.toJSON();
+        // Fetch new user to return with mapped role
+        const createdUser = await User.findByPk(newUser.id, {
+            attributes: { exclude: ['password'] }
+        });
+
         return res.status(201).json({
             message: 'User berhasil ditambahkan.',
-            data: userWithoutPassword
+            data: mapUserRole(createdUser)
         });
     } catch (error) {
         console.error('Error creating user:', error);
@@ -84,7 +113,10 @@ const updateUser = async (req, res) => {
         }
 
         if (name) user.name = name;
-        if (role) user.role = role;
+        if (role) {
+            // Map role string to role_id
+            user.role_id = (role === 'admin') ? 1 : 5;
+        }
 
         if (password) {
             user.password = await bcrypt.hash(password, 10);
@@ -92,10 +124,13 @@ const updateUser = async (req, res) => {
 
         await user.save();
 
-        const { password: _, ...userWithoutPassword } = user.toJSON();
+        const updatedUser = await User.findByPk(user.id, {
+            attributes: { exclude: ['password'] }
+        });
+
         return res.status(200).json({
             message: 'User berhasil diperbarui.',
-            data: userWithoutPassword
+            data: mapUserRole(updatedUser)
         });
     } catch (error) {
         console.error('Error updating user:', error);
