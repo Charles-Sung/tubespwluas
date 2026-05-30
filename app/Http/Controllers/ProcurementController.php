@@ -41,8 +41,12 @@ class ProcurementController extends Controller
             // Fetch items list to let Kalab choose which items to request
             $response = Http::withHeaders($this->getHeaders())->get("{$this->apiUrl}/items");
             $items = $response->successful() ? $response->json() : [];
+
+            // Fetch physical inventories list to let Kalab choose what inventory to replace
+            $invResponse = Http::withHeaders($this->getHeaders())->get("{$this->apiUrl}/inventories");
+            $inventories = $invResponse->successful() ? $invResponse->json() : [];
             
-            return view('procurements.create', compact('items'));
+            return view('procurements.create', compact('items', 'inventories'));
         } catch (\Exception $e) {
             return redirect()->route('procurements.index')->with('error', 'Koneksi ke backend gagal.');
         }
@@ -57,7 +61,8 @@ class ProcurementController extends Controller
             'items.*.item_id' => 'required|integer',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric|min:0',
-            'items.*.purchase_link' => 'nullable|url'
+            'items.*.purchase_link' => 'nullable|url',
+            'items.*.replaced_inventory_id' => 'nullable|integer'
         ]);
 
         try {
@@ -69,7 +74,7 @@ class ProcurementController extends Controller
                     'quantity' => (int) $item['quantity'],
                     'price' => (float) $item['price'],
                     'purchase_link' => $item['purchase_link'] ?? null,
-                    'replaced_inventory_id' => null // Set to null for new purchase drafts
+                    'replaced_inventory_id' => !empty($item['replaced_inventory_id']) ? (int) $item['replaced_inventory_id'] : null
                 ];
             }
 

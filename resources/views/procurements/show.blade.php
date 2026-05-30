@@ -112,6 +112,11 @@
                             <td class="px-6 py-4 text-sm text-slate-500 font-semibold">{{ $index + 1 }}</td>
                             <td class="px-6 py-4">
                                 <span class="text-sm font-bold text-slate-800">{{ $detail['item']['name'] }}</span>
+                                @if(!empty($detail['replaced_inventory']))
+                                    <div class="mt-1.5 text-[10px] text-amber-600 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded inline-flex items-center gap-1 font-bold">
+                                        🔄 Menggantikan: {{ $detail['replaced_inventory']['label_number'] }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-600">

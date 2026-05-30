@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ProcurementController;
+use App\Http\Controllers\ReceiptController;
 
 // Auth Routes (Guest)
 Route::middleware('guest')->group(function () {
@@ -59,5 +60,12 @@ Route::middleware('jwt')->group(function () {
         Route::post('/{id}/submit', [ProcurementController::class, 'submit'])->name('submit');
         Route::post('/detail/{detailId}/review', [ProcurementController::class, 'review'])->name('review');
         Route::post('/{id}/finalize', [ProcurementController::class, 'finalize'])->name('finalize');
+    });
+
+    // Item Receipt Routes (Staf Admin & Admin)
+    Route::prefix('receipts')->name('receipts.')->group(function () {
+        Route::get('/', [ReceiptController::class, 'index'])->name('index');
+        Route::get('/create', [ReceiptController::class, 'create'])->name('create');
+        Route::post('/', [ReceiptController::class, 'store'])->name('store');
     });
 });

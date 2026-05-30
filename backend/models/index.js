@@ -7,6 +7,7 @@ const BhpStock = require('./BhpStock');
 const Inventory = require('./Inventory');
 const ProcurementDraft = require('./ProcurementDraft');
 const ProcurementDetail = require('./ProcurementDetail');
+const ItemReceipt = require('./ItemReceipt');
 
 // Define relationships
 
@@ -94,6 +95,27 @@ ProcurementDetail.belongsTo(Inventory, {
     as: 'replaced_inventory'
 });
 
+// ProcurementDetail <-> ItemReceipt
+ProcurementDetail.hasMany(ItemReceipt, {
+    foreignKey: 'procurement_detail_id',
+    as: 'receipts',
+    onDelete: 'CASCADE'
+});
+ItemReceipt.belongsTo(ProcurementDetail, {
+    foreignKey: 'procurement_detail_id',
+    as: 'detail'
+});
+
+// User <-> ItemReceipt (Staf Admin)
+User.hasMany(ItemReceipt, {
+    foreignKey: 'user_id',
+    as: 'receipts'
+});
+ItemReceipt.belongsTo(User, {
+    foreignKey: 'user_id',
+    as: 'user'
+});
+
 module.exports = {
     sequelize,
     Role,
@@ -103,5 +125,6 @@ module.exports = {
     BhpStock,
     Inventory,
     ProcurementDraft,
-    ProcurementDetail
+    ProcurementDetail,
+    ItemReceipt
 };

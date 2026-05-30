@@ -4,16 +4,21 @@
 @section('page_title', 'Buat Draf Pengadaan Baru')
 
 @section('content')
-<div class="max-w-5xl" x-data="procurementForm()">
-    <div class="mb-6">
+<div class="space-y-6" x-data="procurementForm()">
+    <div class="flex justify-between items-center">
         <a href="{{ route('procurements.index') }}" class="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-700 transition-colors duration-150 font-bold">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Kembali ke Daftar
         </a>
+
+        <button type="button" @click="addItem()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-xl transition-all duration-150 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Tambah Baris Barang
+        </button>
     </div>
 
     @if($errors->has('api_error'))
-        <div class="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm font-semibold">
+        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm font-semibold">
             ⚠️ {{ $errors->first('api_error') }}
         </div>
     @endif
@@ -21,37 +26,30 @@
     <form action="{{ route('procurements.store') }}" method="POST" class="space-y-6">
         @csrf
 
-        <!-- Header Card -->
+        <!-- Header Specs -->
         <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+            <h3 class="text-sm font-bold text-slate-800">Detail Rencana Pengadaan Tahunan</h3>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Title -->
                 <div class="md:col-span-2">
-                    <label for="title" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Judul Draf Pengadaan</label>
+                    <label for="title" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Judul Dokumen Pengadaan</label>
                     <input type="text" name="title" id="title" required value="{{ old('title') }}"
                            class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-200 text-sm"
-                           placeholder="Contoh: Pengadaan PC All-in-One dan BHP Kertas Lab 2026">
+                           placeholder="Contoh: Pengadaan PC & BHP Lab Komputer Tahun Anggaran 2026">
                 </div>
 
                 <!-- Year -->
                 <div>
-                    <label for="year" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tahun Pengadaan</label>
+                    <label for="year" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tahun Anggaran</label>
                     <input type="number" name="year" id="year" required min="2020" max="2100" value="{{ old('year', date('Y')) }}"
-                           class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-200 text-sm"
-                           placeholder="Tahun...">
+                           class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-200 text-sm">
                 </div>
             </div>
         </div>
 
-        <!-- Items Table Card -->
+        <!-- Details Table -->
         <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 class="text-sm font-bold text-slate-800">Daftar Item Pengadaan</h3>
-                <button type="button" @click="addItem()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Tambah Baris Barang
-                </button>
-            </div>
-
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -69,13 +67,25 @@
                             <tr class="hover:bg-slate-50/50 transition-colors duration-150">
                                 <!-- Select Item -->
                                 <td class="px-6 py-4">
-                                    <select :name="'items['+index+'][item_id]'" required x-model="row.item_id"
+                                    <select :name="'items['+index+'][item_id]'" required x-model="row.item_id" @change="onItemSelect(row)"
                                             class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/10 text-xs">
                                         <option value="" disabled selected>Pilih Barang...</option>
                                         @foreach($items as $item)
                                             <option value="{{ $item['id'] }}">{{ $item['name'] }} ({{ $item['type'] }})</option>
                                         @endforeach
                                     </select>
+
+                                    <!-- Replaced Inventory Option (Conditional) -->
+                                    <div class="mt-2.5 p-2.5 bg-slate-50 border border-slate-200/60 rounded-lg" x-show="isInventory(row.item_id)">
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Menggantikan Aset (Opsional):</label>
+                                        <select :name="'items['+index+'][replaced_inventory_id]'" x-model="row.replaced_inventory_id"
+                                                class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-slate-600 focus:outline-none focus:border-indigo-500 text-[10px] font-medium">
+                                            <option value="">-- Tidak menggantikan aset --</option>
+                                            <template x-for="inv in getInventoriesForItem(row.item_id)" :key="inv.id">
+                                                <option :value="inv.id" x-text="inv.label_number + ' - ' + inv.room.name + ' (' + inv.condition.toUpperCase() + ')'"></option>
+                                            </template>
+                                        </select>
+                                    </div>
                                 </td>
 
                                 <!-- Quantity -->
@@ -98,7 +108,7 @@
                                 </td>
 
                                 <!-- Total Estimate -->
-                                <td class="px-6 py-4 text-right text-xs font-bold text-slate-700">
+                                <td class="px-6 py-4 text-right text-xs font-bold text-slate-700 font-mono">
                                     Rp <span x-text="formatNumber(row.quantity * row.price)"></span>
                                 </td>
 
@@ -117,7 +127,7 @@
             <!-- Total Card Summary -->
             <div class="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
                 <span class="text-sm font-bold text-slate-500">ESTIMASI TOTAL ANGGARAN:</span>
-                <span class="text-lg font-bold text-indigo-600">Rp <span x-text="formatNumber(calculateGrandTotal())"></span></span>
+                <span class="text-lg font-bold text-indigo-600 font-mono">Rp <span x-text="formatNumber(calculateGrandTotal())"></span></span>
             </div>
         </div>
 
@@ -137,19 +147,40 @@
     function procurementForm() {
         return {
             rows: [
-                { item_id: '', quantity: 1, price: 0, purchase_link: '' }
+                { item_id: '', quantity: 1, price: 0, purchase_link: '', replaced_inventory_id: '' }
             ],
+            inventoriesList: @json($inventories),
+            itemsList: @json($items),
+            
             addItem() {
-                this.rows.push({ item_id: '', quantity: 1, price: 0, purchase_link: '' });
+                this.rows.push({ item_id: '', quantity: 1, price: 0, purchase_link: '', replaced_inventory_id: '' });
             },
+            
             removeItem(index) {
                 if (this.rows.length > 1) {
                     this.rows.splice(index, 1);
                 }
             },
+            
+            onItemSelect(row) {
+                row.replaced_inventory_id = '';
+            },
+            
+            isInventory(itemId) {
+                if (!itemId) return false;
+                const match = this.itemsList.find(i => i.id == itemId);
+                return match && match.type === 'inventory';
+            },
+            
+            getInventoriesForItem(itemId) {
+                if (!itemId) return [];
+                return this.inventoriesList.filter(inv => inv.item_id == itemId);
+            },
+            
             calculateGrandTotal() {
                 return this.rows.reduce((sum, row) => sum + (row.quantity * row.price), 0);
             },
+            
             formatNumber(num) {
                 return new Intl.NumberFormat('id-ID').format(num);
             }

@@ -46,9 +46,19 @@ const isKalab = (req, res, next) => {
     next();
 };
 
+const isStafAdmin = (req, res, next) => {
+    const roleId = req.user && req.user.role_id;
+    // Admin (1) can also access Staf Admin routes
+    if (roleId !== 4 && roleId !== 1) {
+        return res.status(403).json({ message: 'Akses ditolak: Hanya Staf Administrasi yang diizinkan.' });
+    }
+    next();
+};
+
 module.exports = {
     authenticate,
     isAdmin,
     isKaprodi,
-    isKalab
+    isKalab,
+    isStafAdmin
 };
