@@ -55,7 +55,8 @@ class ItemController extends Controller
             'item_name' => 'required',
             'category' => 'required',
             'stock' => 'required|integer|min:0',
-            'room_id' => 'required|integer'
+            'room_id' => 'required|integer',
+            'type' => 'required|in:inventory,bhp'
         ]);
 
         try {
@@ -64,6 +65,7 @@ class ItemController extends Controller
                 'category' => $request->category,
                 'stock' => (int) $request->stock,
                 'room_id' => (int) $request->room_id,
+                'type' => $request->type
             ]);
 
             if ($response->successful()) {
@@ -100,7 +102,8 @@ class ItemController extends Controller
             'item_name' => 'required',
             'category' => 'required',
             'stock' => 'required|integer|min:0',
-            'room_id' => 'required|integer'
+            'room_id' => 'required|integer',
+            'type' => 'required|in:inventory,bhp'
         ]);
 
         try {
@@ -109,6 +112,7 @@ class ItemController extends Controller
                 'category' => $request->category,
                 'stock' => (int) $request->stock,
                 'room_id' => (int) $request->room_id,
+                'type' => $request->type
             ]);
 
             if ($response->successful()) {

@@ -67,7 +67,7 @@ const getItemById = async (req, res) => {
 // POST create item
 const createItem = async (req, res) => {
     try {
-        const { item_name, category, stock, room_id } = req.body;
+        const { item_name, category, stock, room_id, type } = req.body;
 
         if (!item_name || !category || stock === undefined || !room_id) {
             return res.status(400).json({ message: 'Semua field wajib diisi.' });
@@ -80,13 +80,18 @@ const createItem = async (req, res) => {
         }
 
         // Determine item type (bhp or inventory)
-        const isBhp = category.toLowerCase().includes('bhp') || category.toLowerCase().includes('bahan');
-        const type = isBhp ? 'bhp' : 'inventory';
+        let resolvedType = 'inventory';
+        if (type === 'bhp' || type === 'inventory') {
+            resolvedType = type;
+        } else {
+            const isBhp = category.toLowerCase().includes('bhp') || category.toLowerCase().includes('bahan');
+            resolvedType = isBhp ? 'bhp' : 'inventory';
+        }
 
         // Create Item
         const newItem = await Item.create({
             name: item_name,
-            type,
+            type: resolvedType,
             description: category
         });
 
