@@ -77,7 +77,7 @@
                         class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-200 text-sm">
                     <option value="" disabled selected>Pilih Laboratorium Penempatan...</option>
                     @foreach($rooms as $room)
-                        <option value="{{ $room['id'] }}">{{ $room['name'] }} ({{ $room['description'] ?? 'Tanpa Deskripsi' }})</option>
+                        <option value="{{ $room['id'] }}">{{ $room['room_name'] }} ({{ $room['location'] ?? 'Tanpa Deskripsi' }})</option>
                     @endforeach
                 </select>
             </div>
