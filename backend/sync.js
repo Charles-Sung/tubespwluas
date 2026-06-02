@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { 
-    sequelize, Role, User, Room, Item, BhpStock, Inventory, ProcurementDraft, ProcurementDetail, ItemReceipt 
+    sequelize, Role, User, Room, Item, BhpStock, Inventory, ProcurementDraft, ProcurementDetail, ItemReceipt, MaintenanceLog, MaintenanceBhp 
 } = require('./models');
 
 async function syncAndSeed() {

@@ -25,12 +25,24 @@
                        placeholder="Contoh: PC All-in-One Dell">
             </div>
 
-            <!-- Category -->
+            <!-- Item Type (inventory/bhp) -->
             <div>
-                <label for="category" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori</label>
+                <label for="type" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tipe Barang</label>
+                <select name="type" id="type" required
+                        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-200 text-sm">
+                    <option value="" disabled selected>Pilih Tipe Barang...</option>
+                    <option value="inventory" {{ old('type') === 'inventory' ? 'selected' : '' }}>🖥️ Inventaris (Aset Tetap)</option>
+                    <option value="bhp" {{ old('type') === 'bhp' ? 'selected' : '' }}>📦 BHP (Barang Habis Pakai)</option>
+                </select>
+                <p class="text-[10px] text-slate-400 font-medium mt-1.5">*Inventaris: aset tetap bernomor label. BHP: stok habis pakai seperti tinta, kabel, dsb.</p>
+            </div>
+
+            <!-- Category/Description -->
+            <div>
+                <label for="category" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori / Deskripsi</label>
                 <input type="text" name="category" id="category" required value="{{ old('category') }}"
                        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-200 text-sm"
-                       placeholder="Contoh: Elektronik, Furniture, Jaringan...">
+                       placeholder="Contoh: Elektronik, Jaringan, Furniture...">
             </div>
 
             <!-- Stock -->

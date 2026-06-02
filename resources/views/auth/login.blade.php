@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Capstone Admin</title>
+    <title>Login - SILAB Portal</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,9 +30,9 @@
         <!-- Logo and Title -->
         <div class="text-center mb-8">
             <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/20 mx-auto mb-4 text-xl">
-                C
+                S
             </div>
-            <h2 class="text-2xl font-bold text-slate-800">Administrator Login</h2>
+            <h2 class="text-2xl font-bold text-slate-800">SILAB Login</h2>
             <p class="text-sm text-slate-400 mt-1.5">Sistem Manajemen Aset & BHP Laboratorium</p>
         </div>
 

@@ -8,6 +8,8 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ProcurementController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\BhpController;
+use App\Http\Controllers\MaintenanceController;
 
 // Auth Routes (Guest)
 Route::middleware('guest')->group(function () {
@@ -67,5 +69,18 @@ Route::middleware('jwt')->group(function () {
         Route::get('/', [ReceiptController::class, 'index'])->name('index');
         Route::get('/create', [ReceiptController::class, 'create'])->name('create');
         Route::post('/', [ReceiptController::class, 'store'])->name('store');
+    });
+
+    // BHP Stock (Staf Lab & Admin)
+    Route::prefix('bhp')->name('bhp.')->group(function () {
+        Route::get('/', [BhpController::class, 'index'])->name('index');
+        Route::put('/update', [BhpController::class, 'update'])->name('update');
+    });
+
+    // Maintenance (Staf Lab & Admin)
+    Route::prefix('maintenance')->name('maintenance.')->group(function () {
+        Route::get('/', [MaintenanceController::class, 'index'])->name('index');
+        Route::get('/create', [MaintenanceController::class, 'create'])->name('create');
+        Route::post('/', [MaintenanceController::class, 'store'])->name('store');
     });
 });

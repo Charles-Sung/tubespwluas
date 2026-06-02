@@ -8,6 +8,8 @@ const Inventory = require('./Inventory');
 const ProcurementDraft = require('./ProcurementDraft');
 const ProcurementDetail = require('./ProcurementDetail');
 const ItemReceipt = require('./ItemReceipt');
+const MaintenanceLog = require('./MaintenanceLog');
+const MaintenanceBhp = require('./MaintenanceBhp');
 
 // Define relationships
 
@@ -116,6 +118,48 @@ ItemReceipt.belongsTo(User, {
     as: 'user'
 });
 
+// Inventory <-> MaintenanceLog
+Inventory.hasMany(MaintenanceLog, {
+    foreignKey: 'inventory_id',
+    as: 'maintenance_logs',
+    onDelete: 'CASCADE'
+});
+MaintenanceLog.belongsTo(Inventory, {
+    foreignKey: 'inventory_id',
+    as: 'inventory'
+});
+
+// User <-> MaintenanceLog (Staf Lab)
+User.hasMany(MaintenanceLog, {
+    foreignKey: 'user_id',
+    as: 'maintenance_logs'
+});
+MaintenanceLog.belongsTo(User, {
+    foreignKey: 'user_id',
+    as: 'user'
+});
+
+// MaintenanceLog <-> MaintenanceBhp
+MaintenanceLog.hasMany(MaintenanceBhp, {
+    foreignKey: 'maintenance_log_id',
+    as: 'maintenance_bhps',
+    onDelete: 'CASCADE'
+});
+MaintenanceBhp.belongsTo(MaintenanceLog, {
+    foreignKey: 'maintenance_log_id',
+    as: 'maintenance_log'
+});
+
+// Item <-> MaintenanceBhp
+Item.hasMany(MaintenanceBhp, {
+    foreignKey: 'item_id',
+    as: 'maintenance_bhps'
+});
+MaintenanceBhp.belongsTo(Item, {
+    foreignKey: 'item_id',
+    as: 'item'
+});
+
 module.exports = {
     sequelize,
     Role,
@@ -126,5 +170,7 @@ module.exports = {
     Inventory,
     ProcurementDraft,
     ProcurementDetail,
-    ItemReceipt
+    ItemReceipt,
+    MaintenanceLog,
+    MaintenanceBhp
 };
