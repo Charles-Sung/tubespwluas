@@ -25,6 +25,7 @@ class ItemController extends Controller
     {
         try {
             $type = $request->query('type');
+            $url = "{$this->apiUrl}/items";
             if ($type) {
                 $url .= "?type=" . urlencode($type);
             }
