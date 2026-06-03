@@ -85,7 +85,10 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 @if(($receipt['detail']['item']['type'] ?? '') === 'inventory')
-                                    <button onclick="showReceiptQR('{{ $receipt['detail']['item']['name'] }}', {{ $receipt['quantity_received'] }})" 
+                                    <button onclick="showReceiptQR(this)" 
+                                            data-item-name="{{ $receipt['detail']['item']['name'] }}"
+                                            data-item-desc="{{ $receipt['detail']['item']['description'] ?? '-' }}"
+                                            data-quantity="{{ $receipt['quantity_received'] }}"
                                             class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-violet-50 hover:bg-violet-100 border border-violet-100 rounded text-violet-600 text-xs font-bold transition-all duration-150">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h.01M16 20h2M4 4h4v4H4V4zm12 0h4v4h-4V4zM4 16h4v4H4v-4z"/></svg>
                                         Lihat QR
@@ -137,7 +140,11 @@
 <!-- Load CDN QR Code Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-    function showReceiptQR(itemName, quantity) {
+    function showReceiptQR(btnElement) {
+        const itemName = btnElement.getAttribute('data-item-name');
+        const description = btnElement.getAttribute('data-item-desc');
+        const quantity = parseInt(btnElement.getAttribute('data-quantity'), 10);
+        
         const modal = document.getElementById('qrModal');
         const qrList = document.getElementById('qrCodesList');
         const titleName = document.getElementById('qrItemName');
@@ -151,6 +158,7 @@
         // Generate QR Code for each item
         for (let i = 1; i <= quantity; i++) {
             const labelNumber = 'INV-' + itemName.toUpperCase().replace(/\s+/g, '-') + '-00' + i;
+            const qrContent = `Nama Barang: ${itemName}\nDeskripsi: ${description}\nLabel ID: ${labelNumber}`;
             
             // Create item box
             const qrBox = document.createElement('div');
@@ -172,7 +180,7 @@
 
             // Trigger QR draw
             new QRCode(qrDiv, {
-                text: labelNumber,
+                text: qrContent,
                 width: 120,
                 height: 120,
                 colorDark : "#4f46e5", // Indigo-600 brand color

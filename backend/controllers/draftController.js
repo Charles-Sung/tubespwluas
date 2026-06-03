@@ -3,7 +3,11 @@ const { sequelize, ProcurementDraft, ProcurementDetail, Item, User, Inventory } 
 // GET all drafts with details (and associated items)
 const getAllDrafts = async (req, res) => {
     try {
+        const { year } = req.query;
+        const whereClause = year ? { year } : {};
+        
         const drafts = await ProcurementDraft.findAll({
+            where: whereClause,
             include: [
                 {
                     model: User,
@@ -126,6 +130,65 @@ const createDraft = async (req, res) => {
     }
 };
 
+// PUT update draft with items (Atomic Transaction)
+const updateDraft = async (req, res) => {
+    const t = await sequelize.transaction();
+    try {
+        const { title, year, details } = req.body;
+        
+        const draft = await ProcurementDraft.findByPk(req.params.id);
+        if (!draft) {
+            await t.rollback();
+            return res.status(404).json({ message: 'Draf pengadaan tidak ditemukan.' });
+        }
+        
+        if (draft.status !== 'draft') {
+            await t.rollback();
+            return res.status(400).json({ message: 'Hanya draf baru yang bisa diedit.' });
+        }
+
+        if (title) draft.title = title;
+        if (year) draft.year = year;
+        await draft.save({ transaction: t });
+
+        if (details && Array.isArray(details)) {
+            // Delete old details
+            await ProcurementDetail.destroy({
+                where: { procurement_draft_id: draft.id },
+                transaction: t
+            });
+
+            // Re-create new details
+            const detailRecords = details.map(item => ({
+                procurement_draft_id: draft.id,
+                item_id: item.item_id,
+                quantity: item.quantity,
+                price: item.price,
+                purchase_link: item.purchase_link || null,
+                replaced_inventory_id: item.replaced_inventory_id || null,
+                status: 'pending'
+            }));
+
+            await ProcurementDetail.bulkCreate(detailRecords, { transaction: t });
+        }
+
+        await t.commit();
+
+        const fullDraft = await ProcurementDraft.findByPk(draft.id, {
+            include: [{ model: ProcurementDetail, as: 'details' }]
+        });
+
+        return res.status(200).json({
+            message: 'Draf pengadaan berhasil diperbarui.',
+            data: fullDraft
+        });
+    } catch (error) {
+        await t.rollback();
+        console.error('Error updating procurement draft:', error);
+        return res.status(500).json({ message: 'Gagal memperbarui draf pengadaan.' });
+    }
+};
+
 // PUT submit draft (Change status to submitted)
 const submitDraft = async (req, res) => {
     try {
@@ -222,6 +285,7 @@ module.exports = {
     getAllDrafts,
     getDraftById,
     createDraft,
+    updateDraft,
     submitDraft,
     reviewItem,
     finalizeDraft

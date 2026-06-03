@@ -59,6 +59,8 @@ Route::middleware('jwt')->group(function () {
         Route::get('/create', [ProcurementController::class, 'create'])->name('create');
         Route::post('/', [ProcurementController::class, 'store'])->name('store');
         Route::get('/{id}', [ProcurementController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [ProcurementController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ProcurementController::class, 'update'])->name('update');
         Route::post('/{id}/submit', [ProcurementController::class, 'submit'])->name('submit');
         Route::post('/detail/{detailId}/review', [ProcurementController::class, 'review'])->name('review');
         Route::post('/{id}/finalize', [ProcurementController::class, 'finalize'])->name('finalize');

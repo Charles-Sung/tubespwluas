@@ -34,7 +34,10 @@ const mapItemCompat = async (itemInstance) => {
 // GET all items
 const getAllItems = async (req, res) => {
     try {
-        const items = await Item.findAll();
+        const { type } = req.query;
+        const whereClause = type ? { type } : {};
+        
+        const items = await Item.findAll({ where: whereClause });
         
         const mappedItems = [];
         for (const item of items) {

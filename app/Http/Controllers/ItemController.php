@@ -21,10 +21,14 @@ class ItemController extends Controller
         ];
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $response = Http::withHeaders($this->getHeaders())->get("{$this->apiUrl}/items");
+            $type = $request->query('type');
+            if ($type) {
+                $url .= "?type=" . urlencode($type);
+            }
+            $response = Http::withHeaders($this->getHeaders())->get($url);
             if ($response->successful()) {
                 $items = $response->json();
                 return view('items.index', compact('items'));

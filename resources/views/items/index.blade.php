@@ -10,10 +10,16 @@
         <div>
             <p class="text-sm text-slate-500 font-medium">Daftar inventaris barang dan lokasi ruangan penyimpanan.</p>
         </div>
-        <a href="{{ route('items.create') }}" class="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] transition-all duration-150 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-md shadow-violet-600/10">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Tambah Barang Baru
-        </a>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('items.index') }}" class="px-3 py-1.5 {{ !request('type') ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }} rounded-lg text-xs font-bold transition-colors">Semua</a>
+            <a href="{{ route('items.index', ['type' => 'bhp']) }}" class="px-3 py-1.5 {{ request('type') === 'bhp' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }} rounded-lg text-xs font-bold transition-colors">BHP</a>
+            <a href="{{ route('items.index', ['type' => 'inventory']) }}" class="px-3 py-1.5 {{ request('type') === 'inventory' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }} rounded-lg text-xs font-bold transition-colors">Inventory</a>
+            
+            <a href="{{ route('items.create') }}" class="ml-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] transition-all duration-150 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-md shadow-violet-600/10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Tambah Barang Baru
+            </a>
+        </div>
     </div>
 
     <!-- Data Table Card -->

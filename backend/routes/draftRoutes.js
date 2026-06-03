@@ -13,6 +13,9 @@ router.get('/:id', draftController.getDraftById);
 // Create draft - Kalab and Admin only
 router.post('/', isKalab, draftController.createDraft);
 
+// Update draft - Kalab and Admin only
+router.put('/:id', isKalab, draftController.updateDraft);
+
 // Submit draft to Kaprodi - Kalab and Admin only
 router.put('/:id/submit', isKalab, draftController.submitDraft);
 

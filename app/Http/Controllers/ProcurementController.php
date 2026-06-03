@@ -21,10 +21,16 @@ class ProcurementController extends Controller
         ];
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $response = Http::withHeaders($this->getHeaders())->get("{$this->apiUrl}/procurements");
+            $year = $request->query('year');
+            $url = "{$this->apiUrl}/procurements";
+            if ($year) {
+                $url .= "?year=" . urlencode($year);
+            }
+            
+            $response = Http::withHeaders($this->getHeaders())->get($url);
             if ($response->successful()) {
                 $drafts = $response->json();
                 return view('procurements.index', compact('drafts'));
@@ -89,6 +95,67 @@ class ProcurementController extends Controller
             }
 
             $msg = $response->json()['message'] ?? 'Gagal menyimpan draf pengadaan.';
+            return back()->withErrors(['api_error' => $msg])->withInput();
+        } catch (\Exception $e) {
+            return back()->withErrors(['api_error' => 'Koneksi ke backend gagal.'])->withInput();
+        }
+    }
+
+    public function edit($id)
+    {
+        try {
+            $draftResponse = Http::withHeaders($this->getHeaders())->get("{$this->apiUrl}/procurements/{$id}");
+            $itemsResponse = Http::withHeaders($this->getHeaders())->get("{$this->apiUrl}/items");
+            $invResponse = Http::withHeaders($this->getHeaders())->get("{$this->apiUrl}/inventories");
+
+            if ($draftResponse->successful() && $itemsResponse->successful()) {
+                $draft = $draftResponse->json();
+                $items = $itemsResponse->json();
+                $inventories = $invResponse->successful() ? $invResponse->json() : [];
+                return view('procurements.edit', compact('draft', 'items', 'inventories'));
+            }
+            return redirect()->route('procurements.index')->with('error', 'Gagal memuat draf pengadaan.');
+        } catch (\Exception $e) {
+            return redirect()->route('procurements.index')->with('error', 'Koneksi ke backend gagal.');
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'year' => 'required|integer|min:2020|max:2100',
+            'items' => 'required|array',
+            'items.*.item_id' => 'required|integer',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
+            'items.*.purchase_link' => 'nullable|url',
+            'items.*.replaced_inventory_id' => 'nullable|integer'
+        ]);
+
+        try {
+            $details = [];
+            foreach ($request->items as $item) {
+                $details[] = [
+                    'item_id' => (int) $item['item_id'],
+                    'quantity' => (int) $item['quantity'],
+                    'price' => (float) $item['price'],
+                    'purchase_link' => $item['purchase_link'] ?? null,
+                    'replaced_inventory_id' => !empty($item['replaced_inventory_id']) ? (int) $item['replaced_inventory_id'] : null
+                ];
+            }
+
+            $response = Http::withHeaders($this->getHeaders())->put("{$this->apiUrl}/procurements/{$id}", [
+                'title' => $request->title,
+                'year' => (int) $request->year,
+                'details' => $details
+            ]);
+
+            if ($response->successful()) {
+                return redirect()->route('procurements.index')->with('success', 'Draf pengadaan berhasil diperbarui.');
+            }
+
+            $msg = $response->json()['message'] ?? 'Gagal memperbarui draf pengadaan.';
             return back()->withErrors(['api_error' => $msg])->withInput();
         } catch (\Exception $e) {
             return back()->withErrors(['api_error' => 'Koneksi ke backend gagal.'])->withInput();

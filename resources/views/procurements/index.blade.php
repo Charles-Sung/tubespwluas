@@ -11,13 +11,25 @@
             <p class="text-sm text-slate-500 font-medium">Buat draf pengadaan tahunan baru dan review persetujuan dari Kaprodi.</p>
         </div>
         
-        <!-- Only Kepala Lab and Admin can create new drafts -->
+        <div class="flex items-center gap-3">
+            <!-- Year Filter -->
+            <form action="{{ route('procurements.index') }}" method="GET" class="flex items-center gap-2">
+                <select name="year" onchange="this.form.submit()" class="pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 text-xs focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/10 cursor-pointer">
+                    <option value="">Semua Tahun</option>
+                    @for($y = date('Y') + 1; $y >= 2020; $y--)
+                        <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>Tahun {{ $y }}</option>
+                    @endfor
+                </select>
+            </form>
+
+            <!-- Only Kepala Lab and Admin can create new drafts -->
         @if(session('user')['role_id'] == 2 || session('user')['role_id'] == 1 || strtolower(session('user')['role']) === 'kepala laboratorium')
             <a href="{{ route('procurements.create') }}" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] transition-all duration-150 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/10">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Buat Draf Pengadaan
             </a>
         @endif
+        </div>
     </div>
 
     <!-- Data Table Card -->
@@ -68,6 +80,11 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-center">
+                                @if($draft['status'] === 'draft' && (session('user')['role_id'] == 2 || session('user')['role_id'] == 1 || strtolower(session('user')['role']) === 'kepala laboratorium'))
+                                    <a href="{{ route('procurements.edit', $draft['id']) }}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 text-xs font-bold transition-all duration-150 mr-1">
+                                        Edit
+                                    </a>
+                                @endif
                                 <a href="{{ route('procurements.show', $draft['id']) }}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold transition-all duration-150">
                                     Lihat Detail & Aksi
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
